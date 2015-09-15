@@ -1,0 +1,40 @@
+### -  CHANGES FOR pastebin.py
+
+import urllib2                                                                                                                             |    import requests
+import urllib                                                                                                                              <
+                                                                                                                                           >
+                                                                                                                                           >            self.api_session = requests.session()
+                                                                                                                                           >            self.web_session = requests.session()
+                return self.__processPost(PASTEBIN_API_POST_URL, postData)                                                                 |            return self.__processRequest('POST', PASTEBIN_API_POST_URL, postData)
+                                                                                                                                           |        def __processRequest(self, method, url, data):
+        def __processPost(self, url, data):                                                                                                <
+                                                                                                                                           >            if url == PASTEBIN_API_LOGIN_URL:
+                                                                                                                                           >                web_data = {'submit_hidden': 'submit_hidden',
+                                                                                                                                           >                            'user_name': data['api_user_name'],
+                                                                                                                                           >                            'user_password': data['api_user_password'],
+                                                                                                                                           >                            'submit': 'Login', }
+                                                                                                                                           >                self.web_session.get('http://pastebin.com/login')
+                                                                                                                                           >                self.web_session.post('http://pastebin.com/login.php', data=web_data)
+                request = urllib2.urlopen(url, urllib.urlencode(data))                                                                     |            if url == PASTEBIN_RAW_URL:
+                response = str(request.read())                                                                                             |                req = self.web_session.get(url % data)
+                request.close()                                                                                                            |            else:
+                                                                                                                                           >                req = self.api_session.request(method, url, data=data)
+                                                                                                                                           >            response = req.content
+                self.__api_user_key = self.__processPost(PASTEBIN_API_LOGIN_URL, postData)                                                 |            self.__api_user_key = self.__processRequest('POST', PASTEBIN_API_LOGIN_URL, postData)
+                pastesList = self.__processPost(PASTEBIN_API_POST_URL, postData)                                                           |            pastesList = self.__processRequest('POST', PASTEBIN_API_POST_URL, postData)
+                trendsList = self.__processPost(PASTEBIN_API_POST_URL, postData)                                                           |            trendsList = self.__processRequest('POST', PASTEBIN_API_POST_URL, postData)
+                                                                                                                                           <
+                        retMsg = self.__processPost(PASTEBIN_API_POST_URL, postData)                                                       |                retMsg = self.__processRequest('POST', PASTEBIN_API_POST_URL, postData)
+                retData = self.__processPost(PASTEBIN_API_POST_URL, postData)                                                              |            retData = self.__processRequest('POST', PASTEBIN_API_POST_URL, postData)
+                        request = urllib2.urlopen("%s%s" % (PASTEBIN_RAW_URL, api_paste_key))                                              |                retMsg = self.__processRequest('GET', PASTEBIN_RAW_URL, api_paste_key)
+                        response = request.read()                                                                                          |            except PastebinBadRequestException as e:
+                        request.close()                                                                                                    |                retMsg = str(e)
+                except urllib2.HTTPError as e:                                                                                             <
+                        raise PastebinHTTPErrorException(str(e))                                                                           <
+                return response.decode('utf-8')                                                                                            |            return retMsg.decode('utf-8')
+
+
+
+### - CHANGES FOR pastebin_constants.py
+
+PASTEBIN_RAW_URL = "%s%s" % (PASTEBIN_URL, "raw.php?i=")                                                                                   |    PASTEBIN_RAW_URL = "%s%s" % (PASTEBIN_URL, "raw.php?i=%s")
